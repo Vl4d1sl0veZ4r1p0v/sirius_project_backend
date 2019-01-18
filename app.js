@@ -6,34 +6,39 @@ var port = 3000;
 var Pool = require('pg').Pool;
 var config = {
     host : 'localhost', 
-    user : 'sammy', 
+    user : 'sammy',
     password : '123123',
     database : 'sammy',
 };
-var Table = "main_t";
 var pool = new Pool(config);
 //
-async function get_hits(request, args){
+async function get_hits(app, nick, password){
     try {
-        var response = await pool.query(request, args);
+        var response = await pool.query("INSERT INTO main_t (nick, passwd) VALUES ($1, $2)", [nick, password]);
+        //var response = await pool.query("SELECT * FROM main_t");
         app.get('/', function(req, res){
-            res.send(JSON.stringify(response.rows));
-        });
-        console.log(response.rows);
+            res.send(response.rows);
+        });        
     }
     catch(e){
         console.error("ERROR: ", e);
+        app.get('/', function(req, res){
+            res.send("it's has");
+    });
     }
 }
 //register
 function signUp(nick, password){
-    var request = "INSERT INTO $table (nick, passwd) VALUES ($nick, $passwd)";
-    var args = [Table, nick, password];
-    get_hits(request, args);
-    return 0;
+    get_hits(nick, password);
 }
 //
+var nick = 'lol';
+var password = 'kek';
+signUp(app, nick, password);
 
+app.listen(3000, function () {
+    console.log('Example app listening on port 3000!');
+  });
 //checkdb
 //
 
@@ -42,33 +47,3 @@ function signUp(nick, password){
 
 //make response
 //
-
-
-//Chunck
-// var req = "INSERT INTO sammy_users (users_id, name) VALUES (11, 'v')";
-// db.one(req)
-//     .then(function (data) {
-//         console.log("DATA:", data.value);
-//     })
-//     .catch(function (error) {
-//         console.log("ERROR:", error);
-//     });
-// //
-// var obj = [
-// {
-//     'name': 'Igor',
-//     'surname': 'Drujinin'
-// },
-// {
-//     'name': 'Igor',
-//     'surname': 'Drujinin'
-// }];
-
-// app.get('/', function (req, res) {
-//     res.send(JSON.stringify(obj));
-//   });
-
-// app.listen(port, function () {
-//       console.log(`Example app listening on port ${port}!`);
-// });
-

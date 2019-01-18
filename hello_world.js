@@ -1,3 +1,4 @@
+`use strict`
 var Pool = require('pg').Pool;
 var config = {
     host : 'localhost', 
@@ -8,9 +9,9 @@ var config = {
 
 var pool = new Pool(config);
 
-async function get_hits(){
-    try {
-        var response = await pool.query("INSERT INTO sammy_users (users_id, name) VALUES ($1, $2)", [10, 'V']);
+async function get_hits(table, resq, first, second){
+    try {                
+        var response = await pool.query(resq, [first, second]);
         console.log(response.rows);
     }
     catch(e){
@@ -18,4 +19,8 @@ async function get_hits(){
     }
 }
 
-get_hits();
+var first = 12;
+var second = 'g';
+var table = "sammy_users";
+var resq = "INSERT INTO " + table + " (users_id, name) VALUES ($1, $2)";
+get_hits(table, resq, first, second);

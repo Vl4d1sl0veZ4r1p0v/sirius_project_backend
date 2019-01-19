@@ -1,80 +1,35 @@
 //main conf
 var express = require('express');
 var app = express();
-var bodyParser = require('body-parser');
-var usersController = require('./controllers/users');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
 //
 
-var config = {
-    host : 'localhost', 
-    user : 'sammy',
-    password : '123123',
-    database : 'sammy',
-};
-var pool = new Pool(config);
-
-//get request
-
-//
-
-//checkdb
-async function it_has(app, nick){
-    try {
-        var response = await pool.query("SELECT nick FROM main_t WHERE nick=$1", [nick]);                          
-        return response.rows.length!=0;
-    }
-    catch(e){
-        console.error("ERROR: ", e);
-    }    
-}
-//+
-
-//make response
-async function it_has_response(app, ){
-    try {
-        app.get('/', function(req, res){
-            res.send();
-        }); 
-    }
-    catch(e){
-        console.error("ERROR: ", e);
-    }    
-}
-//
-
-async function signUp(app, nick, password){
-    try {
-        var response = await pool.query("INSERT INTO main_t (nick, passwd) VALUES ($1, $2)", [nick, password]);
-        //var response = await pool.query("SELECT * FROM main_t");
-        app.get('/', function(req, res){
-            res.send(response.rows);
-        });        
-    }
-    catch(e){
-        console.error("ERROR: ", e);
-        app.get('/', function(req, res){
-            res.send("it's has");
-    });
-    }
-}
-//
-var nick = 'lol';
-var password = 'kek';
-//signUp(app, nick, password);
-// if (it_has('lol')){
-//     it_has_response();
-// } else {
-//     signUp(app, nick, password);
-// }
-app.get('/user/:id', function(req, res){
-    res.send('test');
+// Подключаем модуль и ставим на прослушивание 8080-порта - 80й обычно занят под http-сервер
+var io = require('socket.io').listen(3017); 
+// Отключаем вывод полного лога - пригодится в production'е
+// Навешиваем обработчик на подключение нового клиента
+io.sockets.on('connection', function (socket) {
+	// Т.к. чат простой - в качестве ников пока используем первые 5 символов от ID сокета
+	var ID = (socket.id).toString().substr(0, 5);
+	var time = (new Date).toLocaleTimeString();
+	// Посылаем клиенту сообщение о том, что он успешно подключился и его имя
+	socket.json.send({'event': 'connected', 'name': ID, 'time': time});
+	// Посылаем всем остальным пользователям, что подключился новый клиент и его имя
+	socket.broadcast.json.send({'event': 'userJoined', 'name': ID, 'time': time});
+	// Навешиваем обработчик на входящее сообщение
+	socket.on('message', function (msg) {
+		var time = (new Date).toLocaleTimeString();
+		// Уведомляем клиента, что его сообщение успешно дошло до сервера
+		socket.json.send({'event': 'messageSent', 'name': ID, 'text': msg, 'time': time});
+		// Отсылаем сообщение остальным участникам чата
+		socket.broadcast.json.send({'event': 'messageReceived', 'name': ID, 'text': msg, 'time': time})
+	});
+	// При отключении клиента - уведомляем остальных
+	socket.on('disconnect', function() {
+		var time = (new Date).toLocaleTimeString();
+		io.sockets.json.send({'event': 'userSplit', 'name': ID, 'time': time});
+	});
 });
+
 app.listen(3000, function () {
     console.log('Example app listening on port 3000!');
   });
-
-
-
-

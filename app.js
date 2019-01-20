@@ -1,33 +1,54 @@
 //main conf
 var express = require('express');
 var app = express();
-//
-
-// Подключаем модуль и ставим на прослушивание 8080-порта - 80й обычно занят под http-сервер
 var io = require('socket.io').listen(3017); 
-// Отключаем вывод полного лога - пригодится в production'е
-// Навешиваем обработчик на подключение нового клиента
+
+var rooms = new Map();
+//var MaxPlayers = 4;
 io.sockets.on('connection', function (socket) {
-	// Т.к. чат простой - в качестве ников пока используем первые 5 символов от ID сокета
-	var ID = (socket.id).toString().substr(0, 5);
-	var time = (new Date).toLocaleTimeString();
-	// Посылаем клиенту сообщение о том, что он успешно подключился и его имя
-	socket.json.send({'event': 'connected', 'name': ID, 'time': time});
-	// Посылаем всем остальным пользователям, что подключился новый клиент и его имя
-	socket.broadcast.json.send({'event': 'userJoined', 'name': ID, 'time': time});
-	// Навешиваем обработчик на входящее сообщение
-	socket.on('message', function (msg) {
-		var time = (new Date).toLocaleTimeString();
-		// Уведомляем клиента, что его сообщение успешно дошло до сервера
-		socket.json.send({'event': 'messageSent', 'name': ID, 'text': msg, 'time': time});
-		// Отсылаем сообщение остальным участникам чата
-		socket.broadcast.json.send({'event': 'messageReceived', 'name': ID, 'text': msg, 'time': time})
-	});
-	// При отключении клиента - уведомляем остальных
+  //  
+  let ID = (socket.id).toString().substr(0, 5);
+    user = {};
+    user.name = name;
+    user.ID = ID;
+    user.room = room;
+    //
+    console.log(user);
+  //
+  socket.on('SignIn', function(name, room){    
+    //
+      if (rooms.has(room)){
+        rooms[room].add(ID);
+        rooms[room].array.forEach(element => {
+          io.sockets.json.send({'event' : 'userJoined', 'name' : ID});
+        });
+
+        rooms[room].array.forEach(element => {
+        console.log({'event' : 'userJoined', 'name' : ID});
+        });
+        
+      } else {
+        rooms.set(room, new Set());
+        rooms[room].add(user);
+        //
+        rooms[room].array.forEach(element => {
+          console.log({'event' : 'userJoined', 'name' : ID});
+          });
+          //
+      }
+  })
+
 	socket.on('disconnect', function() {
-		var time = (new Date).toLocaleTimeString();
-		io.sockets.json.send({'event': 'userSplit', 'name': ID, 'time': time});
-	});
+		io.sockets.json.send({'event': 'userSplit', 'name': user.name});
+  });
+  rooms[user.room].delete(user);
+  if (rooms[user.room].size == 0)
+    rooms.delete(user.room);
+    //
+    rooms[room].array.forEach(element => {
+      console.log({'event' : 'userJoined', 'name' : ID});
+      });
+      //
 });
 
 app.listen(3000, function () {

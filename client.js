@@ -5,16 +5,28 @@ var io = require('socket.io')(server);
 
 var path = require('path');
 
-var port = 3000;
+var port = 80;
 
 app.get('/', function(req, res){
 	res.sendFile(__dirname + '/index.html');
 
 });
 
+console.log("what?");
 io.on('connection', function(socket){
 	socket.send('Hello, world');//автоматичесски message
-
+	//
+	var ID = (socket.id).toString().substr(0, 5);
+	var user = {};
+	user.ID = ID;
+        socket.on('message', function(data){
+		console.log("OK");
+		console.log(data);
+		user.name = data['name'];
+		user.room = data['room'];
+	});
+	console.log(JSON.stringify(user));
+	//
 	socket.on('greeting', function(data){
 		console.log(data);
 	});

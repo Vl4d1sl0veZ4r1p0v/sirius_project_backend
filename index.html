@@ -5,16 +5,13 @@
 		<title>Demo</title>
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
-			var socket = io.connect('http://:3000');
+			var socket = io.connect('http://95.163.181.238:80');
 
 			socket.on('message', function(data){
 				console.log(data);
 				document.write(data);
-			socket.emit('greeting', {response : 'data received!'});
-			
 			})
-		
-		
+			socket.json.send({'name' : 'Foo', 'room' : '123'});
 		</script>
 		</head>
 		<body>

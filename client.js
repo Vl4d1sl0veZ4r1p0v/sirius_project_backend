@@ -21,11 +21,13 @@ io.on('connection', function(socket){
 	user.ID = ID;
         socket.on('message', function(data){
 		console.log("OK");
-		console.log(data);
+		console.log(data + ' ' + data['name'] + ' ' + data['room']);
 		user.name = data['name'];
 		user.room = data['room'];
-	});
 	console.log(JSON.stringify(user));
+	
+});
+
 	//
 	socket.on('greeting', function(data){
 		console.log(data);

@@ -17,31 +17,37 @@ io.sockets.on('connection', function(socket){
 	//
 	console.log('connect ', socket.ID);
 	//
-	 socket.on('joinRoom', function(name){//проверяем, что это наши люди
-			//
-			console.log(name, "joined");
-			//
-	 		if (name == first || name == second){
-	 			if (name == first)
-	 				p1 = true;
-	 			else
-	 				p2 = true;
-	 		}
-	 		//
-	 		if (p1 && p2){
-	 			io.sockets.emit('gameStart', function(room){
-					console.log('gamestart');
-					//
-	 				io.sockets.send(room);
-					 setTimeout(function(){
-					 	io.sockets.emit('finish', function(){
-					 		io.sockets.close();//возможно закрывать можно просто сокет
-					 	})
-					 	console.log('The End.');
-					 }, 10000)
-	 			})
-	 		}
-	 	})
+	socket.on('joinRoom', function(name){//проверяем, что это наши люди
+        //
+        console.log(name, "joined");
+        //
+        if (name == first || name == second){
+            if (name == first)
+                p1 = true;
+            else
+                p2 = true;
+        }
+            //
+        process.nextTick(function(){
+            if (p1 && p2){
+                io.sockets.emit('gameStart', function(room){
+                    //
+                    console.log('gamestart');
+                    //
+                    io.sockets.send(room);
+                    setImmediate(function(){
+                        setTimeout(function(){
+                            io.sockets.emit('finish', function(){
+                                io.sockets.send("finish");//возможно закрывать можно просто сокет
+                                console.log('finish');
+                            })
+                            console.log('The End.');
+                        }, 10000)
+                    })
+                })
+            }
+        })
+    })
 	// //
 //	socket.on('gameTurn', function(name, table){
 //		mname = name;

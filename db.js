@@ -1,4 +1,15 @@
+var roomT = 
+[
+    0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0 ,0,
+    0, 0, 0, 2, 0, 0,
+    0, 0, 0, 0, 0, 0
+];
+
+var room = roomT.join(' ');
+//
 app = require('express')();
+//
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var path = require('path');
@@ -8,16 +19,15 @@ var port = 80;
 //
 var mname = '', mtable = '';
 //
-var room = "0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0";
-//
 var first = 'Belka', second = 'Kostya';
 var p1 = false, p2 = false;
+var count = 0;
 //
 io.sockets.on('connection', function(socket){
 	//
-	console.log('connect ', socket.ID);
+	console.log('connect');
 	//
-	socket.on('joinRoom', function(name){//проверяем, что это наши люди
+	socket.on('joinRoom', function(name){
         //
         console.log(name, "joined");
         //
@@ -27,26 +37,16 @@ io.sockets.on('connection', function(socket){
             else
                 p2 = true;
         }
-            //
-        process.nextTick(function(){
-            if (p1 && p2){
-                io.sockets.emit('gameStart', function(room){
-                    //
-                    console.log('gamestart');
-                    //
-                    io.sockets.send(room);
-                    setImmediate(function(){
-                        setTimeout(function(){
-                            io.sockets.emit('finish', function(){
-                                io.sockets.send("finish");//возможно закрывать можно просто сокет
-                                console.log('finish');
-                            })
-                            console.log('The End.');
-                        }, 10000)
-                    })
-                })
-            }
-        })
+        //
+        if (p1 && p2){
+            io.sockets.send('gameStart', room);
+            // setImmediate(function(){
+            //     setTimeout(function(){
+            //         io.sockets.send("finish");//возможно закрывать можно просто сокет
+            //         console.log('finish');
+            //     }, 10000);
+            // })
+        }
     })
 	// //
 //	socket.on('gameTurn', function(name, table){
@@ -80,16 +80,20 @@ io.sockets.on('connection', function(socket){
 
 
 	socket.on('disconnect', function(){
-		console.log('disconnect', socket.ID);
+		console.log('disconnect ' +  socket.ID);
 	})
-	//
-	// socket.on('message', function(name, table){
-	// 	mname = name;
-	// 	mtable = table;
-	// 	//
-	// 	io.sockets.send(mtable);
-	// 	console.log(mname + ' ' + mtable);
-	// });
+	 socket.on('message', function(name, table){
+		if(table == 'ProblemsOffTheEndGame'){
+			++count;
+			if (count == 3)
+				io.sockets.emit('finish');
+		}
+		else{
+	 		mtable = table;
+	 		io.sockets.send(mtable);
+		}
+	 	console.log(table);
+	 });
 });
 
 server.listen(port, function(){

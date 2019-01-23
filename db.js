@@ -4,7 +4,7 @@ var io = require('socket.io')(server);
 var path = require('path');
 var port = 80;
 //
-server.unref();
+//
 //
 var mname = '', mtable = '';
 //
@@ -30,7 +30,6 @@ io.sockets.on('connection', function(socket){
 	 		//
 	 		if (p1 && p2){
 	 			io.sockets.emit('gameStart', function(room){
-					//
 					console.log('gamestart');
 					//
 	 				io.sockets.send(room);
@@ -39,39 +38,39 @@ io.sockets.on('connection', function(socket){
 					 		io.sockets.close();//возможно закрывать можно просто сокет
 					 	})
 					 	console.log('The End.');
-					 }, 3000)
+					 }, 10000)
 	 			})
 	 		}
 	 	})
 	// //
-	socket.on('gameTurn', function(name, table){
-		mname = name;
-		mtable = table;
-		//
-		io.sockets.send(mtable);
-		//
-		console.log('gameTurn ' + mname + ' ' + mtable);
-	});
-	//
-	socket.on('finish', function(name){
-		//
-		console.log('finish');
-		//
-		if (name == first || name == second){
-			if (first == name){
-				first = '';
-				p1 = false;
-			} else {
-				second = '';
-				p2 = false;
-			}
-		}
-		if (!(p1 && p2)){
-			io.sockets.send("Finish");
-			io.sockets.close();//возможно закрывать можно просто сокет
-			console.log('Finish');
-		}
-	})
+//	socket.on('gameTurn', function(name, table){
+//		mname = name;
+//		mtable = table;
+//		//
+//		io.sockets.send(mtable);
+//		//
+//		console.log('gameTurn ' + mname + ' ' + mtable);
+//	});
+//	//
+//	socket.on('finish', function(name){
+//		//
+//		console.log('finish');
+//		//
+//		if (name == first || name == second){
+//			if (first == name){
+//				first = '';
+//				p1 = false;
+//			} else {
+//				second = '';
+//				p2 = false;
+//			}
+//		}
+//		if (!(p1 && p2)){
+//			io.sockets.send("Finish");
+//			io.sockets.close();//возможно закрывать можно просто сокет
+//			console.log('Finish');
+//		}
+//	})
 
 
 	socket.on('disconnect', function(){

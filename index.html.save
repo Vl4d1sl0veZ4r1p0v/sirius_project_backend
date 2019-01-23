@@ -6,11 +6,12 @@
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
 			var socket = io.connect('http://95.163.181.238:80');
-			socket.emit('message', { response : "hi"});
+
 			socket.on('message', function(data){
 				console.log(data);
 				document.write(data);
 			})
+			socket.json.send({'name' : 'Egor', 'room' : '123'});
 		</script>
 		</head>
 		<body>

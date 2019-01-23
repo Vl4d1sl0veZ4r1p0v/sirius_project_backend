@@ -12,27 +12,36 @@ var port = 80;
 
 //});
 
-console.log("what?");
-io.on('connection', function(socket){
-	console.log("new user connect) " + socket.id);
-	socket.send('Hello, world');//автоматичесски message
+io.sockets.on('connection', function(socket){
+	var mname = '', mtable = '';
+//	io.sockets.send('0 0 0 2 2 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 9 9');
+	socket.on('message', function(table){
+		mname = name;
+                mtable = table;
+		//
+		console.log(name, table);
+		io.sockets.send(mname + ' ' + mtable);
+		console.log(mname + ' ' + mtable);
+	});
+
+//	socket.emit('updateTable', function(){
+//		socket.send('0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 9 9');		
+//	})
+//	var arr = [];
+//	socket.on('message', function(first, arr){
+//		console.log(first);
+//		console.log(arr);
+//	})
+//	socket.send('Hello, world');//автоматичесски message
 	//
-	var ID = (socket.id).toString().substr(0, 5);
-	var user = {};
-	user.ID = ID;
-        socket.on('message', function(data){
-		console.log("OK");
-		console.log(data + ' ' + data['name'] + ' ' + data['room']);
-		user.name = data['name'];
-		user.room = data['room'];
-	console.log(JSON.stringify(user));
-	
-});
+//	var ID = (socket.id).toString().substr(0, 5);
+//	var user = {};
+//	user.ID = ID;
 
 	//
-	socket.on('disconnect', function(){
-		console.log("user disconnect " + socket.id);
-	});
+//	socket.on('greeting', function(data){
+//		console.log(data);
+//	});
 })
 
 // var rooms = new Map();

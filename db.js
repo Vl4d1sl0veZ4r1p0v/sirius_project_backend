@@ -9,7 +9,9 @@ var port = 80;
 //
 var mname = '', mtable = '';
 var names = new Map();
+var maxname = '';
 var score = 0;
+var room = "0 0 3 0 0 0 0 0 1 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0";
 //
 var count = 0;
 var num = 0;
@@ -25,16 +27,29 @@ io.sockets.on('connection', function(socket){
 	socket.on('message', function(name, table){
 		if (!names.has(name)){
 			names.set(name, num);
-			socket.send('number', num);
+			socket.send('number', num.toString());
+			if (num == 1){
+				io.sockets.send('startGame', room);
+				console.log('startGame', room);
+			}
+			console.log('number', num);
 			++num;
 		}
 		//
-		if(name == 'ProblemsOffTheEndGame'){
-			if (Number(table) > score || score == 0)
-				io.sockets.send(Number)
+		var pos = table.indexOf(' ');
+		if (table.substr(0, 21) == 'ProblemsOffTheEndGame' && pos != -1){
+			var tnum = table.substr(22, 12);
+			console.log('tnum', tnum);
+			if (Number(tnum) > score || score == 0){
+				score = Number(tnum);
+				maxname = name;
+				console.log('compare ', score);
+			}
 			++count;
-			if (count == 2)
-				io.sockets.emit('finish');
+			if (count == 2){
+				io.sockets.send('finish', maxname, score.toString());
+				console.log('finish', maxname, score.toString());
+			}
 		}
 		else {
 			mtable = table;
